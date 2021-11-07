@@ -7,6 +7,8 @@ import fileio.Input;
 import fileio.InputLoader;
 import fileio.Writer;
 import org.json.simple.JSONArray;
+import repo.Output;
+import repo.Repository;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +72,10 @@ public final class Main {
         Writer fileWriter = new Writer(filePath2);
         JSONArray arrayResult = new JSONArray();
 
-        //TODO add here the entry point to your implementation
+        Repository repository = Repository.getInstance();
+        repository.initializeRepo(input);
+        Output.setOuput(fileWriter, arrayResult);
+        repository.doActions(input.getCommands());
 
         fileWriter.closeJSON(arrayResult);
     }
