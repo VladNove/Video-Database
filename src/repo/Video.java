@@ -13,6 +13,8 @@ public abstract class Video {
 
 	private int views;
 
+	public double rating;
+
 	public Video(String title, int year, ArrayList<String> genres) {
 		this.title = title;
 		this.year = year;
@@ -21,7 +23,8 @@ public abstract class Video {
 		this.views = 0;
 	}
 
-	public String getTitle() {
+	@Override
+	public String toString() {
 		return title;
 	}
 

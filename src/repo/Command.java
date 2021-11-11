@@ -27,45 +27,54 @@ public class Command {
 		int views = user.view(video);
 		video.View();
 		Output.write(action.getActionId(), "", "success -> " +
-				video.getTitle() + " was viewed with total views of " + views);
+				video + " was viewed with total views of " + views);
 	}
 
 	private static void Favourite(User user, Video video, ActionInputData action) throws IOException {
 
 		if (!user.seenVideo(video)) {
 			Output.write(action.getActionId(), "", "error -> " +
-					video.getTitle() + " is not seen");
+					video + " is not seen");
 			return;
 		}
 
 		if (user.isFavourite(video)) {
 			Output.write( action.getActionId(), "", "error -> " +
-					video.getTitle() + " is already in favourite list");
+					video + " is already in favourite list");
 			return;
 		}
 
 		user.Favourite(video);
 		Output.write(action.getActionId(), "","success -> " +
-				video.getTitle() + " was added as favourite");
+				video + " was added as favourite");
 	}
 
 	private static void Rate(User user, Video video, ActionInputData action) throws IOException {
 		double grade = action.getGrade();
 		int seasonNumber = action.getSeasonNumber();
+
 		if (seasonNumber==0) {
 			Movie movie = (Movie) video;
-			user.Rate(movie, grade);
+			if (user.rated(movie)) {
+				Output.write(action.getActionId(), "", "error -> " + video + " has been already rated");
+				return;
+			}
+			user.rate(movie, grade);
 			movie.Rate(grade);
 		}
 		else {
 			Series series = (Series) video;
 			Season season = series.getSeason(seasonNumber);
-			user.Rate(season, grade);
+			if (user.rated(season)) {
+				Output.write(action.getActionId(), "", "error -> " + video + " has been already rated");
+				return;
+			}
+			user.rate(season, grade);
 			series.Rate(seasonNumber, grade);
 		}
 
 		Output.write(action.getActionId(), "", "success -> " +
-				video.getTitle() + " was rated with " + grade + " by " + user.getUsername());
+				video + " was rated with " + grade + " by " + user.getUsername());
 	}
 
 

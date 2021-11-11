@@ -12,7 +12,7 @@ public class Actor {
 	private final String careerDescription;
 	private final Map<String, Video> filmography;
 	private final Map<ActorsAwards, Integer> awards;
-
+	private double rating;
 	public Actor(ActorInputData actorInputData) {
 		this.name = actorInputData.getName();
 		this.careerDescription = actorInputData.getCareerDescription();
@@ -35,6 +35,10 @@ public class Actor {
 				cnt++;
 			sum += video_rating;
 		}
+		if (cnt == 0)
+			rating = 0;
+		else
+			rating = sum/cnt;
 		return sum/cnt;
 	}
 

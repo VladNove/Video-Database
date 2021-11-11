@@ -21,11 +21,15 @@ public final class Repository {
 	private final HashMap<String, Actor> actors = new HashMap<>();
 	private final HashMap<String, Video> videos = new HashMap<>();
 
-
+//TODO remove singleton
 	public static Repository getInstance()
 	{
-		if (instance == null)
-			instance = new Repository();
+		return instance;
+	}
+
+	public static Repository createInstance()
+	{
+		instance = new Repository();
 		return instance;
 	}
 
@@ -69,6 +73,7 @@ public final class Repository {
 					video.getCast().add(actor);
 				}
 			}
+			actors.put(actor.toString(), actor);
 		}
 	}
 

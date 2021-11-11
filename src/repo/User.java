@@ -39,11 +39,15 @@ public class User {
 		return  views.get(video);
 	}
 
-	public void Rate(Movie movie, double rating) {
+	public boolean rated(Movie movie) { return movieRatings.containsKey(movie); }
+
+	public boolean rated(Season season) { return seriesRatings.containsKey(season); }
+
+	public void rate(Movie movie, double rating) {
 		movieRatings.put(movie, rating);
 	}
 
-	public void Rate(Season season, double rating) {
+	public void rate(Season season, double rating) {
 		seriesRatings.put(season, rating);
 	}
 

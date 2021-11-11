@@ -23,16 +23,13 @@ public class Series extends Video {
 	}
 
 	public double getRating(){
+		if (seasons.size() == 0) return 0;
+
 		double sum = 0;
-		int cnt = 0;
-		for (Season season : seasons)
-		{
-			double season_rating = Util.average(season.getRatings());
-			if (season_rating > 0)
-				cnt++;
-			sum += season_rating;
-		}
-		return sum/cnt;
+		for (Season season: seasons)
+			sum += Util.average(season.getRatings());
+		rating = sum / seasons.size();
+		return sum / seasons.size();
 	}
 
 

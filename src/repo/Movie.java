@@ -19,6 +19,7 @@ public class Movie extends Video{
 	}
 
 	public double getRating(){
-		return Util.average(ratings);
+		rating = Util.average(ratings);
+		return rating;
 	}
 }

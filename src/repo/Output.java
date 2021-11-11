@@ -8,7 +8,7 @@ import java.io.IOException;
 public class Output {
 	private static Writer fileWriter;
 	private static JSONArray arrayResult;
-	public static void setOuput(Writer writer, JSONArray jsonArray) {
+	public static void setOutput(Writer writer, JSONArray jsonArray) {
 		fileWriter = writer;
 		arrayResult = jsonArray;
 	}
