@@ -32,5 +32,11 @@ public class Series extends Video {
 		return sum / seasons.size();
 	}
 
-
+	@Override
+	public int getDuration() {
+		int sum = 0;
+		for (Season season: seasons)
+			sum += season.getDuration();
+		return sum;
+	}
 }

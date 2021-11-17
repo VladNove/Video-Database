@@ -2,9 +2,11 @@ package repo;
 
 import actor.ActorsAwards;
 import entertainment.Season;
+import fileio.ActionInputData;
 import fileio.ActorInputData;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Actor {
@@ -40,6 +42,33 @@ public class Actor {
 		else
 			rating = sum/cnt;
 		return sum/cnt;
+
+	}
+
+	public int numberOfAwards()
+	{
+		int s = 0;
+		for (int x : awards.values())
+		{
+			s+=x;
+		}
+		return s;
+	}
+
+	public boolean hasAwards(List<String> awardList) {
+		if (awardList != null)
+			for (String award : awardList)
+				if (!awards.containsKey(ActorsAwards.valueOf(award)))
+					return false;
+				return true;
+	}
+
+	public boolean hasWords(List<String> wordList) {
+		if(wordList != null)
+			for (String word : wordList)
+				if (!careerDescription.contains(word))
+					return false;
+				return true;
 	}
 
 	@Override

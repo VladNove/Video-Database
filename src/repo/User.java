@@ -39,6 +39,10 @@ public class User {
 		return  views.get(video);
 	}
 
+	public int ratings() {
+		return movieRatings.size() + seriesRatings.size();
+	}
+
 	public boolean rated(Movie movie) { return movieRatings.containsKey(movie); }
 
 	public boolean rated(Season season) { return seriesRatings.containsKey(season); }
@@ -61,5 +65,10 @@ public class User {
 
 	public boolean isFavourite(Video video) {
 		return favoriteMovies.contains(video);
+	}
+
+	@Override
+	public String toString() {
+		return username;
 	}
 }

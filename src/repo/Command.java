@@ -14,8 +14,17 @@ public class Command {
 		if (user == null) return;
 		Video video = repository.getVideo(action.getTitle());
 		if (video == null) return;
-		if (action.getType().equals("view"))
+		if (action.getType().equals("view")) {
 			View(user, video, action);
+			return;
+		}
+
+		if (!user.seenVideo(video)) {
+			Output.write(action.getActionId(), "", "error -> " +
+					video + " is not seen");
+			return;
+		}
+
 		if (action.getType().equals("favorite"))
 			Favourite(user, video, action);
 		if (action.getType().equals("rating"))
@@ -32,12 +41,6 @@ public class Command {
 
 	private static void Favourite(User user, Video video, ActionInputData action) throws IOException {
 
-		if (!user.seenVideo(video)) {
-			Output.write(action.getActionId(), "", "error -> " +
-					video + " is not seen");
-			return;
-		}
-
 		if (user.isFavourite(video)) {
 			Output.write( action.getActionId(), "", "error -> " +
 					video + " is already in favourite list");
@@ -45,6 +48,7 @@ public class Command {
 		}
 
 		user.Favourite(video);
+		video.Favourite();
 		Output.write(action.getActionId(), "","success -> " +
 				video + " was added as favourite");
 	}

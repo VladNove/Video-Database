@@ -61,6 +61,7 @@ public final class Repository {
 
 			for (String videoName: userInputData.getFavoriteMovies()) {
 				user.Favourite(videos.get(videoName));
+				videos.get(videoName).Favourite();
 			}
 		}
 
@@ -84,9 +85,13 @@ public final class Repository {
 		return users.get(username);
 	}
 
+	public Stream<User> getUsers() { return users.values().stream(); }
+
 	public Stream<Actor> getActors() {
 		return actors.values().stream();
 	}
+
+	public Stream<Video> getVideos() { return videos.values().stream(); }
 
 	public void doActions(List<ActionInputData> actions) throws IOException {
 		for (ActionInputData action : actions)
@@ -98,6 +103,5 @@ public final class Repository {
 		}
 
 	}
-
 
 }

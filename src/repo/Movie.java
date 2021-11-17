@@ -22,4 +22,9 @@ public class Movie extends Video{
 		rating = Util.average(ratings);
 		return rating;
 	}
+
+	@Override
+	public int getDuration() {
+		return duration;
+	}
 }
