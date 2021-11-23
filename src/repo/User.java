@@ -43,6 +43,10 @@ public class User {
 		return movieRatings.size() + seriesRatings.size();
 	}
 
+	public String getSubscriptionType() {
+		return subscriptionType;
+	}
+
 	public boolean rated(Movie movie) { return movieRatings.containsKey(movie); }
 
 	public boolean rated(Season season) { return seriesRatings.containsKey(season); }

@@ -5,9 +5,13 @@ import entertainment.Season;
 import fileio.ActionInputData;
 import fileio.ActorInputData;
 
+import javax.naming.directory.SearchControls;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Actor {
 	private final String name;
@@ -64,10 +68,16 @@ public class Actor {
 	}
 
 	public boolean hasWords(List<String> wordList) {
+		String description = careerDescription.toLowerCase();
+
 		if(wordList != null)
-			for (String word : wordList)
-				if (!careerDescription.contains(word))
+			for (String searchedWord : wordList) {
+				String pattern = "\\b"+searchedWord.toLowerCase()+"\\b";
+				Pattern p=Pattern.compile(pattern);
+				Matcher m=p.matcher(description);
+				if (!m.find())
 					return false;
+			}
 				return true;
 	}
 

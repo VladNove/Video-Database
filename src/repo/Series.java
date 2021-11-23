@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class Series extends Video {
 	private final ArrayList<Season> seasons;
 
-	public Series(SerialInputData movieInputData) {
-		super(movieInputData.getTitle(), movieInputData.getYear(), movieInputData.getGenres());
+	public Series(SerialInputData movieInputData, int id) {
+		super(movieInputData.getTitle(), movieInputData.getYear(), movieInputData.getGenres(), id);
 		this.seasons = movieInputData.getSeasons();
 	}
 
@@ -38,5 +38,15 @@ public class Series extends Video {
 		for (Season season: seasons)
 			sum += season.getDuration();
 		return sum;
+	}
+
+	@Override
+	public boolean isMovie() {
+		return false;
+	}
+
+	@Override
+	public boolean isSeries() {
+		return true;
 	}
 }

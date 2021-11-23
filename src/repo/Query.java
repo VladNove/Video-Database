@@ -17,15 +17,18 @@ public class Query {
 			List <Actor> actorList = new ArrayList<>();
 			if (action.getCriteria().equals("average")) {
 				actorList = getActorsWithRating(repository);
+				actorList.sort(Comparator.comparing(Actor::toString));
 				sortActorsByAverage(actorList);
 			}
 			if (action.getCriteria().equals("awards")) {
 				actorList = getActorsWithAwards(repository,action.getFilters().get(3));
+				actorList.sort(Comparator.comparing(Actor::toString));
 				actorList.sort(Comparator.comparing(Actor::numberOfAwards));
 
 			}
 			if (action.getCriteria().equals("filter_description")) {
 				actorList = getActorsWithWords(repository,action.getFilters().get(2));
+				actorList.sort(Comparator.comparing(Actor::toString));
 				actorList.sort(Comparator.comparing(Actor::toString));
 			}
 
@@ -38,6 +41,7 @@ public class Query {
 		if (action.getObjectType().equals("users")) {
 
 			List <User> userList = new ArrayList<>(repository.getUsers().filter(user -> user.ratings() > 0).toList());
+			userList.sort(Comparator.comparing(User::toString));
 			userList.sort(Comparator.comparing(User::ratings));
 
 
@@ -51,7 +55,11 @@ public class Query {
 			String year = action.getFilters().get(0).get(0);
 			List<String> genres = action.getFilters().get(1);
 			List<Video> videoList = getFilteredVideos(repository, year, genres);
-
+			videoList.sort(Comparator.comparing(Video::toString));
+			if (action.getObjectType().equals("movies"))
+				videoList.removeIf(Video::isSeries);
+			if (action.getObjectType().equals("shows"))
+				videoList.removeIf(Video::isMovie);
 
 			if (action.getCriteria().equals("ratings")) {
 				videoList = new ArrayList<>(videoList.stream().filter(video -> video.getRating() > 0).toList());

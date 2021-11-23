@@ -6,10 +6,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public final class Repository {
@@ -20,6 +17,7 @@ public final class Repository {
 	private final HashMap<String, User> users = new HashMap<>();
 	private final HashMap<String, Actor> actors = new HashMap<>();
 	private final HashMap<String, Video> videos = new HashMap<>();
+	private final HashSet<String> genres = new HashSet<>();
 
 //TODO remove singleton
 	public static Repository getInstance()
@@ -36,12 +34,14 @@ public final class Repository {
 	public void initializeRepo(Input input)
 	{
 		for (MovieInputData movieInputData: input.getMovies()) {
-			Movie movie = new Movie(movieInputData);
+			Movie movie = new Movie(movieInputData, videos.size());
 			videos.put(movieInputData.getTitle(),movie);
+			genres.addAll(movieInputData.getGenres());
 		}
 		for (SerialInputData serialInputData: input.getSerials()) {
-			Series series = new Series(serialInputData);
+			Series series = new Series(serialInputData, videos.size());
 			videos.put(serialInputData.getTitle(),series);
+			genres.addAll(serialInputData.getGenres());
 		}
 
 		for (UserInputData userInputData: input.getUsers()) {
@@ -93,6 +93,8 @@ public final class Repository {
 
 	public Stream<Video> getVideos() { return videos.values().stream(); }
 
+	public Stream<String> getGenres() { return genres.stream(); }
+
 	public void doActions(List<ActionInputData> actions) throws IOException {
 		for (ActionInputData action : actions)
 		{
@@ -100,6 +102,8 @@ public final class Repository {
 				Command.executeAction(action);
 			if (action.getActionType().equals("query"))
 				Query.executeAction(action);
+			if (action.getActionType().equals("recommendation"))
+				Recommendation.executeAction(action);
 		}
 
 	}
