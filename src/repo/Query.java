@@ -29,7 +29,6 @@ public class Query {
 			if (action.getCriteria().equals("filter_description")) {
 				actorList = getActorsWithWords(repository,action.getFilters().get(2));
 				actorList.sort(Comparator.comparing(Actor::toString));
-				actorList.sort(Comparator.comparing(Actor::toString));
 			}
 
 			if (action.getSortType().equals("desc"))

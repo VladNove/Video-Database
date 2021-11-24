@@ -19,7 +19,7 @@ public class Command {
 			return;
 		}
 
-		if (!user.seenVideo(video)) {
+		if (user.seenVideo(video)) {
 			Output.write(action.getActionId(), "", "error -> " +
 					video + " is not seen");
 			return;
@@ -56,28 +56,35 @@ public class Command {
 	private static void Rate(User user, Video video, ActionInputData action) throws IOException {
 		double grade = action.getGrade();
 		int seasonNumber = action.getSeasonNumber();
+		boolean error = false;
 
 		if (seasonNumber==0) {
 			Movie movie = (Movie) video;
 			if (user.rated(movie)) {
-				Output.write(action.getActionId(), "", "error -> " + video + " has been already rated");
-				return;
+				error = true;
 			}
-			user.rate(movie, grade);
-			movie.Rate(grade);
+			else {
+				user.rate(movie, grade);
+				movie.Rate(grade);
+			}
 		}
 		else {
 			Series series = (Series) video;
 			Season season = series.getSeason(seasonNumber);
 			if (user.rated(season)) {
-				Output.write(action.getActionId(), "", "error -> " + video + " has been already rated");
-				return;
+				error = true;
 			}
-			user.rate(season, grade);
-			series.Rate(seasonNumber, grade);
+			else {
+				user.rate(season, grade);
+				series.Rate(seasonNumber, grade);
+			}
 		}
 
-		Output.write(action.getActionId(), "", "success -> " +
+
+		if (error)
+			Output.write(action.getActionId(), "", "error -> " + video + " has been already rated");
+		else
+			Output.write(action.getActionId(), "", "success -> " +
 				video + " was rated with " + grade + " by " + user.getUsername());
 	}
 

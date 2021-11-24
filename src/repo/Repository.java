@@ -98,6 +98,8 @@ public final class Repository {
 	public void doActions(List<ActionInputData> actions) throws IOException {
 		for (ActionInputData action : actions)
 		{
+			//TODO interface Action
+			//TODO make them Objects
 			if (action.getActionType().equals("command"))
 				Command.executeAction(action);
 			if (action.getActionType().equals("query"))

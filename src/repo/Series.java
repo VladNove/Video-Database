@@ -27,7 +27,7 @@ public class Series extends Video {
 
 		double sum = 0;
 		for (Season season: seasons)
-			sum += Util.average(season.getRatings());
+			sum += Helper.average(season.getRatings());
 		rating = sum / seasons.size();
 		return sum / seasons.size();
 	}

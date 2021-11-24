@@ -5,9 +5,9 @@ import fileio.MovieInputData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Movie extends Video{
+public class Movie extends Video implements Ratable{
 	private final int duration;
-	private List<Double> ratings;
+	private final List<Double> ratings;
 	public Movie(MovieInputData movieInputData, int id) {
 		super(movieInputData.getTitle(), movieInputData.getYear(), movieInputData.getGenres(),id);
 		this.duration = movieInputData.getDuration();
@@ -19,7 +19,7 @@ public class Movie extends Video{
 	}
 
 	public double getRating(){
-		rating = Util.average(ratings);
+		rating = Helper.average(ratings);
 		return rating;
 	}
 

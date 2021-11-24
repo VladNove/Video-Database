@@ -15,7 +15,7 @@ public class Recommendation {
         if(action.getType().equals("standard"))
         {
             recommendedVideo = repository.getVideos().
-                    filter(video -> !user.seenVideo(video)).
+                    filter(user::seenVideo).
                     min(Comparator.comparing(Video::getId));
 
             if (recommendedVideo.isPresent())
@@ -27,7 +27,7 @@ public class Recommendation {
         if(action.getType().equals("search"))
         {
             Object[] result = repository.getVideos().
-                    filter(video -> !user.seenVideo(video)).
+                    filter(user::seenVideo).
                     filter(video -> video.hasGenre(action.getGenre())).
                     sorted((o1, o2) -> {
                         int rating = Double.compare(o1.getRating(), o2.getRating());
@@ -45,7 +45,7 @@ public class Recommendation {
         if(action.getType().equals("best_unseen"))
         {
             recommendedVideo = repository.getVideos().
-                    filter(video -> !user.seenVideo(video)).
+                    filter(video -> user.seenVideo(video)).
                     max((o1, o2) -> {
                         int rating = Double.compare(o1.getRating(), o2.getRating());
                         if (rating != 0)
@@ -63,7 +63,7 @@ public class Recommendation {
         if(action.getType().equals("favorite"))
         {
             recommendedVideo = repository.getVideos().
-                    filter(video -> !user.seenVideo(video)).
+                    filter(video -> user.seenVideo(video)).
                     max((o1, o2) -> {
                         int rating = Double.compare(o1.getFavourites(), o2.getFavourites());
                         if (rating != 0)
@@ -92,7 +92,7 @@ public class Recommendation {
             for(String genre : popularGenres)
             {
                 recommendedVideo = repository.getVideos().
-                        filter(video -> !user.seenVideo(video)).
+                        filter(video -> user.seenVideo(video)).
                         filter(video -> video.hasGenre(genre)).
                         min(Comparator.comparing(Video::getId));
                 if (recommendedVideo.isPresent()) {
