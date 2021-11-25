@@ -1,11 +1,14 @@
-package repo;
+package repo.Entities;
 
 import fileio.MovieInputData;
+import repo.Entities.Ratable;
+import repo.Entities.Video;
+import repo.Helper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Movie extends Video implements Ratable{
+public class Movie extends Video implements Ratable {
 	private final int duration;
 	private final List<Double> ratings;
 	public Movie(MovieInputData movieInputData, int id) {
@@ -26,15 +29,5 @@ public class Movie extends Video implements Ratable{
 	@Override
 	public int getDuration() {
 		return duration;
-	}
-
-	@Override
-	public boolean isMovie() {
-		return true;
-	}
-
-	@Override
-	public boolean isSeries() {
-		return false;
 	}
 }

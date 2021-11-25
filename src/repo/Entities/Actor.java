@@ -1,19 +1,15 @@
-package repo;
+package repo.Entities;
 
 import actor.ActorsAwards;
-import entertainment.Season;
-import fileio.ActionInputData;
 import fileio.ActorInputData;
 
-import javax.naming.directory.SearchControls;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Actor {
+public class Actor extends Entity {
 	private final String name;
 	private final String careerDescription;
 	private final Map<String, Video> filmography;
@@ -30,7 +26,7 @@ public class Actor {
 		return filmography;
 	}
 
-	public double getRating() {
+	public Double getRating() {
 		double sum = 0;
 		int cnt = 0;
 		for (Video video : filmography.values()) {
@@ -43,7 +39,7 @@ public class Actor {
 
 	}
 
-	public int numberOfAwards()
+	public Integer numberOfAwards()
 	{
 		int s = 0;
 		for (int x : awards.values())

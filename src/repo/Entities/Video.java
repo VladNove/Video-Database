@@ -1,9 +1,11 @@
-package repo;
+package repo.Entities;
+
+import repo.Entities.Actor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Video {
+public abstract class Video extends Entity {
     private final String title;
 
     private final int id;
@@ -59,11 +61,6 @@ public abstract class Video {
     }
 
     public abstract int getDuration();
-
-
-    public abstract boolean isMovie();
-
-    public abstract boolean isSeries();
 
     public boolean isFromYear(String year) {
         if (year == null) return true;

@@ -1,7 +1,8 @@
-package repo;
+package repo.Entities;
 
 import entertainment.Season;
 import fileio.SerialInputData;
+import repo.Helper;
 
 import java.util.ArrayList;
 
@@ -15,11 +16,6 @@ public class Series extends Video {
 
 	public Season getSeason(int number) {
 		return seasons.get(number-1);
-	}
-
-	public void Rate(int season_number, double grade)
-	{
-		getSeason(season_number).getRatings().add(grade);
 	}
 
 	public double getRating(){
@@ -38,15 +34,5 @@ public class Series extends Video {
 		for (Season season: seasons)
 			sum += season.getDuration();
 		return sum;
-	}
-
-	@Override
-	public boolean isMovie() {
-		return false;
-	}
-
-	@Override
-	public boolean isSeries() {
-		return true;
 	}
 }

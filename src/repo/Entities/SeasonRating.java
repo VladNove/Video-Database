@@ -1,10 +1,10 @@
-package repo;
+package repo.Entities;
 
 import entertainment.Season;
 
 import java.util.Objects;
 
-public class SeasonRating implements Ratable{
+public class SeasonRating implements Ratable {
     private final Season season;
 
     public SeasonRating(Season season) {

@@ -14,7 +14,7 @@ public class Output {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void write(int id, String field, String message ) throws IOException {
-		arrayResult.add(fileWriter.writeFile(id, field, message));
+	public static void write(int id, String message) throws IOException {
+		arrayResult.add(fileWriter.writeFile(id, "", message));
 	}
 }

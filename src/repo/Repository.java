@@ -1,113 +1,120 @@
 package repo;
 
-import fileio.ActionInputData;
 import fileio.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import repo.Actions.ActionExecutor;
+import repo.Actions.Command;
+import repo.Actions.Query;
+import repo.Actions.Recommendation;
+import repo.Entities.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class Repository {
 
-	private static Repository instance;
-	private Repository(){}
+    private final HashMap<String, User> users = new HashMap<>();
+    private final HashMap<String, Actor> actors = new HashMap<>();
+    private final HashMap<String, Series> seriesMap = new HashMap<>();
+    private final HashMap<String, Movie> moviesMap = new HashMap<>();
+    private final HashSet<String> genres = new HashSet<>();
+    private final HashMap<String, ActionExecutor> executors = new HashMap<>();
+    private int numberOfVideos = 0;
 
-	private final HashMap<String, User> users = new HashMap<>();
-	private final HashMap<String, Actor> actors = new HashMap<>();
-	private final HashMap<String, Video> videos = new HashMap<>();
-	private final HashSet<String> genres = new HashSet<>();
+    public Repository(Input input) {
+        executors.put("command", new Command(this));
+        executors.put("query", new Query(this));
+        executors.put("recommendation", new Recommendation(this));
+        initializeRepo(input);
+    }
 
-//TODO remove singleton
-	public static Repository getInstance()
-	{
-		return instance;
-	}
+    public void initializeRepo(Input input) {
+        for (MovieInputData movieInputData : input.getMovies()) {
+            Movie movie = new Movie(movieInputData, numberOfVideos++);
+            moviesMap.put(movieInputData.getTitle(), movie);
+            genres.addAll(movieInputData.getGenres());
+        }
+        for (SerialInputData serialInputData : input.getSerials()) {
+            Series series = new Series(serialInputData, numberOfVideos++);
+            seriesMap.put(serialInputData.getTitle(), series);
+            genres.addAll(serialInputData.getGenres());
+        }
 
-	public static Repository createInstance()
-	{
-		instance = new Repository();
-		return instance;
-	}
+        for (UserInputData userInputData : input.getUsers()) {
+            User user = (userInputData.getSubscriptionType().equals("PREMIUM")) ?
+                    new User(userInputData) :
+                    new PremiumUser(userInputData);
 
-	public void initializeRepo(Input input)
-	{
-		for (MovieInputData movieInputData: input.getMovies()) {
-			Movie movie = new Movie(movieInputData, videos.size());
-			videos.put(movieInputData.getTitle(),movie);
-			genres.addAll(movieInputData.getGenres());
-		}
-		for (SerialInputData serialInputData: input.getSerials()) {
-			Series series = new Series(serialInputData, videos.size());
-			videos.put(serialInputData.getTitle(),series);
-			genres.addAll(serialInputData.getGenres());
-		}
+            users.put(userInputData.getUsername(), user);
 
-		for (UserInputData userInputData: input.getUsers()) {
-			User user = new User(userInputData);
-			if (userInputData.getSubscriptionType().equals("PREMIUM"))
-				user = new PremiumUser(userInputData);
+            for (Map.Entry<String, Integer> entry : userInputData.getHistory().entrySet()) {
+                Video video = getVideo(entry.getKey());
+                int nr_views = entry.getValue();
+                user.getHistory().put(video, nr_views);
+                video.View(nr_views);
 
-			users.put(userInputData.getUsername(),user);
+            }
 
-			for (Map.Entry<String,Integer> entry: userInputData.getHistory().entrySet()) {
-				Video video = videos.get(entry.getKey());
-				int nr_views = entry.getValue();
-				user.getHistory().put(video, nr_views);
-				video.View(nr_views);
+            for (String videoName : userInputData.getFavoriteMovies()) {
+                Video video = getVideo(videoName);
+                user.Favourite(video);
+                video.Favourite();
+            }
+        }
 
-			}
+        for (ActorInputData actorInputData : input.getActors()) {
+            Actor actor = new Actor(actorInputData);
+            for (String videoName : actorInputData.getFilmography()) {
+                Video video = getVideo(videoName);
+                if (video != null) {
+                    actor.getFilmography().put(videoName, video);
+                    video.getCast().add(actor);
+                }
+            }
+            actors.put(actor.toString(), actor);
+        }
+    }
 
-			for (String videoName: userInputData.getFavoriteMovies()) {
-				user.Favourite(videos.get(videoName));
-				videos.get(videoName).Favourite();
-			}
-		}
+    public Video getVideo(String title) {
+        Video video = moviesMap.get(title);
+        return (video == null) ? seriesMap.get(title) : video;
+    }
 
-		for (ActorInputData actorInputData: input.getActors()) {
-			Actor actor = new Actor(actorInputData);
-			for (String videoName: actorInputData.getFilmography()) {
-				Video video = videos.get(videoName);
-				if (video != null) {
-					actor.getFilmography().put(videoName, video);
-					video.getCast().add(actor);
-				}
-			}
-			actors.put(actor.toString(), actor);
-		}
-	}
+    public User getUser(String username) {
+        return users.get(username);
+    }
 
-	public Video getVideo(String title) {
-		return videos.get(title);
-	}
-	public User getUser(String username) {
-		return users.get(username);
-	}
+    public Stream<User> getUsers() {
+        return users.values().stream().sorted();
+    }
 
-	public Stream<User> getUsers() { return users.values().stream(); }
+    public Stream<Actor> getActors() {
+        return actors.values().stream().sorted();
+    }
 
-	public Stream<Actor> getActors() {
-		return actors.values().stream();
-	}
+    public Stream<Movie> getMovies() {
+        return moviesMap.values().stream().sorted();
+    }
 
-	public Stream<Video> getVideos() { return videos.values().stream(); }
+    public Stream<Series> getSeries() {
+        return seriesMap.values().stream().sorted();
+    }
 
-	public Stream<String> getGenres() { return genres.stream(); }
+    public Stream<Video> getVideos() {
+        return Stream.concat(moviesMap.values().stream(), seriesMap.values().stream()).sorted();
+    }
 
-	public void doActions(List<ActionInputData> actions) throws IOException {
-		for (ActionInputData action : actions)
-		{
-			//TODO interface Action
-			//TODO make them Objects
-			if (action.getActionType().equals("command"))
-				Command.executeAction(action);
-			if (action.getActionType().equals("query"))
-				Query.executeAction(action);
-			if (action.getActionType().equals("recommendation"))
-				Recommendation.executeAction(action);
-		}
+    public Stream<String> getGenres() {
+        return genres.stream();
+    }
 
-	}
+    public void doActions(List<ActionInputData> actions) throws IOException {
+        for (ActionInputData action : actions)
+            executors.get(action.getActionType()).executeAction(action);
+
+    }
 
 }

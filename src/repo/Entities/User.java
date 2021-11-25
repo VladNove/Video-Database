@@ -1,26 +1,22 @@
-package repo;
+package repo.Entities;
 
-import entertainment.Season;
 import fileio.UserInputData;
 
 import java.util.*;
 
-public class User {
+public class User extends Entity{
 	private final String username;
 
 	//TODO Visitor pattern for Recommendations
 	private final String subscriptionType;
 	private final Set<Video> favoriteMovies;
 	private final Map<Video,Integer> views;
-	private final Map<Movie, Double> movieRatings;
-	private final Map<Season, Double> seasonRatings;
-
+	private final Set<Ratable> ratings;
 	public User(UserInputData userInputData) {
 		this.username = userInputData.getUsername();
 		this.subscriptionType = userInputData.getSubscriptionType();
 		this.favoriteMovies = new HashSet<>();
-		this.movieRatings = new HashMap<>();
-		this.seasonRatings =  new HashMap<>();
+		ratings = new HashSet<>();
 		this.views = new HashMap<>();
 	}
 
@@ -42,36 +38,26 @@ public class User {
 	}
 
 	public int ratings() {
-		return movieRatings.size() + seasonRatings.size();
+		return ratings.size();
 	}
 
 	public String getSubscriptionType() {
 		return subscriptionType;
 	}
 
-	public boolean rated(Movie movie) { return movieRatings.containsKey(movie); }
+	public boolean rated(Ratable ratable) { return ratings.contains(ratable); }
 
-	public boolean rated(Season season) { return seasonRatings.containsKey(season); }
-
-	public void rate(Movie movie, double rating) {
-		movieRatings.put(movie, rating);
-	}
-
-	public void rate(Season season, double rating) {
-		seasonRatings.put(season, rating);
-	}
+	public void rate(Ratable ratable) { ratings.add(ratable); }
 
 	public String getUsername() {
 		return username;
 	}
 
-	public boolean seenVideo(Video video) {
+	public boolean notSeenVideo(Video video) {
 		return !views.containsKey(video);
 	}
 
-	public boolean isFavourite(Video video) {
-		return favoriteMovies.contains(video);
-	}
+	public boolean isFavourite(Video video) { return favoriteMovies.contains(video); }
 
 	@Override
 	public String toString() {
