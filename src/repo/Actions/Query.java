@@ -5,7 +5,7 @@ import repo.Entities.Actor;
 import repo.Entities.Entity;
 import repo.Entities.User;
 import repo.Entities.Video;
-import repo.Helper;
+import utils.Helper;
 import repo.Output;
 import repo.Repository;
 
@@ -16,21 +16,22 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class Query extends ActionExecutor {
+public final class Query extends ActionExecutor {
 
 
-    public Query(Repository repository) {
+    public Query(final Repository repository) {
         super(repository);
     }
 
-    private static void outputQuery(ActionInputData action, Stream<?> result) throws IOException {
+    private static void outputQuery(final ActionInputData action, final Stream<?> result)
+            throws IOException {
         Output.write(action.getActionId(), "Query result: " + Arrays.toString(result.toArray()));
     }
 
-    private Stream<Actor> QueryActors(ActionInputData action) {
+    private Stream<Actor> queryActors(final ActionInputData action) {
         Predicate<Actor> filter = actor -> switch (action.getCriteria()) {
             case "average" -> actor.getRating() > 0;
-            case "awards" -> actor.hasAwards(action.getFilters().get(3));
+            case "awards" -> actor.hasAwards(action.getFilters().get(2 + 1));
             default -> actor.hasWords(action.getFilters().get(2));
         };
         Comparator<Actor> comparator = switch (action.getCriteria()) {
@@ -42,12 +43,12 @@ public class Query extends ActionExecutor {
         return repository.getActors().filter(filter).sorted(comparator);
     }
 
-    private Stream<? extends Video> QueryVideos(ActionInputData action) {
+    private Stream<? extends Video> queryVideos(final ActionInputData action) {
         String year = action.getFilters().get(0).get(0);
         List<String> genres = action.getFilters().get(1);
-        Stream<? extends Video> videoStream = (action.getObjectType().equals("movies")) ?
-                repository.getMovies() :
-                repository.getSeries();
+        Stream<? extends Video> videoStream = (action.getObjectType().equals("movies"))
+                ? repository.getMovies()
+                : repository.getSeries();
 
         Predicate<Video> filter = video -> switch (action.getCriteria()) {
             case "ratings" -> video.getRating() > 0;
@@ -67,23 +68,20 @@ public class Query extends ActionExecutor {
                 .filter(filter).sorted(comparator);
     }
 
-    public void executeAction(ActionInputData action) throws IOException {
-        Stream<? extends Entity> result = Stream.empty();
-        String object = action.getObjectType();
 
-        if (object.equals("actors"))
-            result = QueryActors(action);
-
-        if (object.equals("users"))
-            result = repository.getUsers()
+    /** executes an action of the Query type */
+    public void executeAction(final ActionInputData action) throws IOException {
+        Stream<? extends Entity> result = switch (action.getObjectType()) {
+            case "actors" -> queryActors(action);
+            case "movies", "shows" -> queryVideos(action);
+            default -> repository.getUsers()
                     .filter(user -> user.ratings() > 0)
                     .sorted(Comparator.comparing(User::ratings));
+        };
 
-        if (object.equals("movies") || object.equals("shows"))
-            result = QueryVideos(action);
-
-        if (action.getSortType().equals("desc"))
+        if (action.getSortType().equals("desc")) {
             result = Helper.reverse(result);
+        }
 
         outputQuery(action, result.limit(action.getNumber()));
     }

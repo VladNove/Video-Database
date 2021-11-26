@@ -72,8 +72,8 @@ public final class Main {
         Writer fileWriter = new Writer(filePath2);
         JSONArray arrayResult = new JSONArray();
 
-        Repository repository = new Repository(input);
         Output.setOutput(fileWriter, arrayResult);
+        Repository repository = new Repository(input);
         repository.doActions(input.getCommands());
 
         fileWriter.closeJSON(arrayResult);

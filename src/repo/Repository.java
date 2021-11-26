@@ -1,11 +1,15 @@
 package repo;
 
-import fileio.*;
+import fileio.ActionInputData;
+import fileio.ActorInputData;
+import fileio.Input;
+import fileio.MovieInputData;
+import fileio.SerialInputData;
+import fileio.UserInputData;
 import repo.Actions.ActionExecutor;
 import repo.Actions.Command;
 import repo.Actions.Query;
-import repo.Actions.Recommendation;
-import repo.Entities.*;
+import repo.Actions.Recommend;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,108 +17,129 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import repo.Entities.Actor;
+import repo.Entities.User;
+import repo.Entities.UserTypes.PremiumUser;
+import repo.Entities.UserTypes.StandardUser;
+import repo.Entities.Video;
+import repo.Entities.VideoTypes.Movie;
+import repo.Entities.VideoTypes.Series;
 
 public final class Repository {
 
-    private final HashMap<String, User> users = new HashMap<>();
-    private final HashMap<String, Actor> actors = new HashMap<>();
-    private final HashMap<String, Series> seriesMap = new HashMap<>();
-    private final HashMap<String, Movie> moviesMap = new HashMap<>();
-    private final HashSet<String> genres = new HashSet<>();
-    private final HashMap<String, ActionExecutor> executors = new HashMap<>();
-    private int numberOfVideos = 0;
+  private final HashMap<String, User> users = new HashMap<>();
+  private final HashMap<String, Actor> actors = new HashMap<>();
+  private final HashMap<String, Series> seriesMap = new HashMap<>();
+  private final HashMap<String, Movie> moviesMap = new HashMap<>();
+  private final HashSet<String> genres = new HashSet<>();
+  private final HashMap<String, ActionExecutor> executors = new HashMap<>();
+  private int numberOfVideos = 0;
 
-    public Repository(Input input) {
-        executors.put("command", new Command(this));
-        executors.put("query", new Query(this));
-        executors.put("recommendation", new Recommendation(this));
-        initializeRepo(input);
+  public Repository(final Input input) {
+    loadInput(input);
+    executors.put("command", new Command(this));
+    executors.put("query", new Query(this));
+    executors.put("recommendation", new Recommend(this));
+  }
+
+  /** executes list of actions */
+  public void doActions(final List<ActionInputData> actions) throws IOException {
+    for (ActionInputData action : actions) {
+      executors.get(action.getActionType()).executeAction(action);
+    }
+  }
+
+  private void loadInput(final Input input) {
+    for (MovieInputData movieInputData : input.getMovies()) {
+      loadMovie(movieInputData);
+    }
+    for (SerialInputData serialInputData : input.getSerials()) {
+      loadSerial(serialInputData);
+    }
+    for (UserInputData userInputData : input.getUsers()) {
+      loadUser(userInputData);
+    }
+    for (ActorInputData actorInputData : input.getActors()) {
+      loadActor(actorInputData);
+    }
+  }
+
+  private void loadSerial(final SerialInputData serialInputData) {
+    Series series = new Series(serialInputData, numberOfVideos++);
+    seriesMap.put(serialInputData.getTitle(), series);
+    genres.addAll(serialInputData.getGenres());
+  }
+
+  private void loadMovie(final MovieInputData movieInputData) {
+    Movie movie = new Movie(movieInputData, numberOfVideos++);
+    moviesMap.put(movieInputData.getTitle(), movie);
+    genres.addAll(movieInputData.getGenres());
+  }
+
+  private void loadActor(final ActorInputData actorInputData) {
+    Actor actor = new Actor(actorInputData);
+    for (String videoName : actorInputData.getFilmography()) {
+      Video video = getVideo(videoName);
+      if (video != null) {
+        actor.getFilmography().put(videoName, video);
+      }
+    }
+    actors.put(actor.toString(), actor);
+  }
+
+  private void loadUser(final UserInputData userInputData) {
+    User user = (userInputData.getSubscriptionType().equals("PREMIUM"))
+            ? new PremiumUser(userInputData)
+            : new StandardUser(userInputData);
+
+    for (Map.Entry<String, Integer> entry : userInputData.getHistory().entrySet()) {
+      Video video = getVideo(entry.getKey());
+      int nrViews = entry.getValue();
+      user.getHistory().put(video, nrViews);
+      video.view(nrViews);
     }
 
-    public void initializeRepo(Input input) {
-        for (MovieInputData movieInputData : input.getMovies()) {
-            Movie movie = new Movie(movieInputData, numberOfVideos++);
-            moviesMap.put(movieInputData.getTitle(), movie);
-            genres.addAll(movieInputData.getGenres());
-        }
-        for (SerialInputData serialInputData : input.getSerials()) {
-            Series series = new Series(serialInputData, numberOfVideos++);
-            seriesMap.put(serialInputData.getTitle(), series);
-            genres.addAll(serialInputData.getGenres());
-        }
-
-        for (UserInputData userInputData : input.getUsers()) {
-            User user = (userInputData.getSubscriptionType().equals("PREMIUM")) ?
-                    new User(userInputData) :
-                    new PremiumUser(userInputData);
-
-            users.put(userInputData.getUsername(), user);
-
-            for (Map.Entry<String, Integer> entry : userInputData.getHistory().entrySet()) {
-                Video video = getVideo(entry.getKey());
-                int nr_views = entry.getValue();
-                user.getHistory().put(video, nr_views);
-                video.View(nr_views);
-
-            }
-
-            for (String videoName : userInputData.getFavoriteMovies()) {
-                Video video = getVideo(videoName);
-                user.Favourite(video);
-                video.Favourite();
-            }
-        }
-
-        for (ActorInputData actorInputData : input.getActors()) {
-            Actor actor = new Actor(actorInputData);
-            for (String videoName : actorInputData.getFilmography()) {
-                Video video = getVideo(videoName);
-                if (video != null) {
-                    actor.getFilmography().put(videoName, video);
-                    video.getCast().add(actor);
-                }
-            }
-            actors.put(actor.toString(), actor);
-        }
+    for (String videoName : userInputData.getFavoriteMovies()) {
+      Video video = getVideo(videoName);
+      user.favourite(video);
+      video.favourite();
     }
 
-    public Video getVideo(String title) {
-        Video video = moviesMap.get(title);
-        return (video == null) ? seriesMap.get(title) : video;
-    }
+    users.put(userInputData.getUsername(), user);
+  }
 
-    public User getUser(String username) {
-        return users.get(username);
-    }
+  /** returns Video with specified title from database */
+  public Video getVideo(final String title) {
+    Video video = moviesMap.get(title);
+    return (video == null) ? seriesMap.get(title) : video;
+  }
 
-    public Stream<User> getUsers() {
-        return users.values().stream().sorted();
-    }
+  /** returns User with specified username from database */
+  public User getUser(final String username) {
+    return users.get(username);
+  }
 
-    public Stream<Actor> getActors() {
-        return actors.values().stream().sorted();
-    }
+  public Stream<User> getUsers() {
+    return users.values().stream().sorted();
+  }
 
-    public Stream<Movie> getMovies() {
-        return moviesMap.values().stream().sorted();
-    }
+  public Stream<Actor> getActors() {
+    return actors.values().stream().sorted();
+  }
 
-    public Stream<Series> getSeries() {
-        return seriesMap.values().stream().sorted();
-    }
+  public Stream<Movie> getMovies() {
+    return moviesMap.values().stream().sorted();
+  }
 
-    public Stream<Video> getVideos() {
-        return Stream.concat(moviesMap.values().stream(), seriesMap.values().stream()).sorted();
-    }
+  public Stream<Series> getSeries() {
+    return seriesMap.values().stream().sorted();
+  }
 
-    public Stream<String> getGenres() {
-        return genres.stream();
-    }
+  public Stream<Video> getVideos() {
+    return Stream.concat(moviesMap.values().stream(), seriesMap.values().stream()).sorted();
+  }
 
-    public void doActions(List<ActionInputData> actions) throws IOException {
-        for (ActionInputData action : actions)
-            executors.get(action.getActionType()).executeAction(action);
-
-    }
-
+  public Stream<String> getGenres() {
+    return genres.stream();
+  }
 }

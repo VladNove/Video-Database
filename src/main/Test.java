@@ -27,8 +27,7 @@ public final class Test {
 
         if (inputDir != null) {
             Arrays.sort(inputDir);
-            for (File file : inputDir)
-                System.out.println(file.getName());
+
             Scanner scanner = new Scanner(System.in);
             String fileName = scanner.next();
             for (File file : inputDir) {

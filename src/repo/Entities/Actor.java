@@ -9,70 +9,72 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Actor extends Entity {
-	private final String name;
-	private final String careerDescription;
-	private final Map<String, Video> filmography;
-	private final Map<ActorsAwards, Integer> awards;
+public final class Actor extends Entity {
+  private final String name;
+  private final String careerDescription;
+  private final Map<String, Video> filmography;
+  private final Map<ActorsAwards, Integer> awards;
 
-	public Actor(ActorInputData actorInputData) {
-		this.name = actorInputData.getName();
-		this.careerDescription = actorInputData.getCareerDescription();
-		this.filmography = new HashMap<>();
-		this.awards = actorInputData.getAwards();
-	}
+  public Actor(final ActorInputData actorInputData) {
+    this.name = actorInputData.getName();
+    this.careerDescription = actorInputData.getCareerDescription();
+    this.filmography = new HashMap<>();
+    this.awards = actorInputData.getAwards();
+  }
 
-	public Map<String, Video> getFilmography() {
-		return filmography;
-	}
+  public Map<String, Video> getFilmography() {
+    return filmography;
+  }
 
-	public Double getRating() {
-		double sum = 0;
-		int cnt = 0;
-		for (Video video : filmography.values()) {
-			double video_rating = video.getRating();
-			if (video_rating > 0)
-				cnt++;
-			sum += video_rating;
-		}
-		return sum/cnt;
+  /**Computes average rating of rated videos in this actor's filmography*/
+  public Double getRating() {
+    double sum = 0;
+    int cnt = 0;
+    for (Video video : filmography.values()) {
+      double videoRating = video.getRating();
+      if (videoRating > 0) {
+        cnt++;
+      }
+      sum += videoRating;
+    }
+    return sum / cnt;
+  }
 
-	}
+  /**Finds how many awards does this actor have*/
+  public Integer numberOfAwards() {
+    return awards.values().stream().reduce(0, Integer::sum);
+  }
 
-	public Integer numberOfAwards()
-	{
-		int s = 0;
-		for (int x : awards.values())
-		{
-			s+=x;
-		}
-		return s;
-	}
+  /**Finds how many awards does this actor have*/
+  public boolean hasAwards(final List<String> awardList) {
+    if (awardList != null) {
+      for (String award : awardList) {
+        if (!awards.containsKey(ActorsAwards.valueOf(award))) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
-	public boolean hasAwards(List<String> awardList) {
-		if (awardList != null)
-			for (String award : awardList)
-				if (!awards.containsKey(ActorsAwards.valueOf(award)))
-					return false;
-				return true;
-	}
+  /**checks if the words are included in Actor's description*/
+  public boolean hasWords(final List<String> wordList) {
+    String description = careerDescription.toLowerCase();
 
-	public boolean hasWords(List<String> wordList) {
-		String description = careerDescription.toLowerCase();
+    if (wordList != null) {
+      for (String searchedWord : wordList) {
+        String pattern = "\\b" + searchedWord.toLowerCase() + "\\b";
+        Matcher m = Pattern.compile(pattern).matcher(description);
+        if (!m.find()) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
-		if(wordList != null)
-			for (String searchedWord : wordList) {
-				String pattern = "\\b"+searchedWord.toLowerCase()+"\\b";
-				Pattern p=Pattern.compile(pattern);
-				Matcher m=p.matcher(description);
-				if (!m.find())
-					return false;
-			}
-				return true;
-	}
-
-	@Override
-	public String toString() {
-		return name;
-	}
+  @Override
+  public String toString() {
+    return name;
+  }
 }
