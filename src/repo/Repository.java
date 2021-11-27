@@ -81,7 +81,7 @@ public final class Repository {
     for (String videoName : actorInputData.getFilmography()) {
       Video video = getVideo(videoName);
       if (video != null) {
-        actor.getFilmography().put(videoName, video);
+        actor.getFilmography().add(video);
       }
     }
     actors.put(actor.toString(), actor);

@@ -23,9 +23,28 @@ public final class Query extends ActionExecutor {
         super(repository);
     }
 
-    private static void outputQuery(final ActionInputData action, final Stream<?> result)
+    private static void outputQuery(final ActionInputData action,
+        final Stream<? extends Entity> result)
             throws IOException {
-        Output.write(action.getActionId(), "Query result: " + Arrays.toString(result.toArray()));
+        Output.write(action.getActionId(), "Query result: "
+                    + Arrays.toString(result.toArray()));
+    }
+
+    /** executes an action of the Query type */
+    public void executeAction(final ActionInputData action) throws IOException {
+        Stream<? extends Entity> result = switch (action.getObjectType()) {
+            case "actors" -> queryActors(action);
+            case "movies", "shows" -> queryVideos(action);
+            default -> repository.getUsers()
+                .filter(user -> user.ratings() > 0)
+                .sorted(Comparator.comparing(User::ratings));
+        };
+
+        if (action.getSortType().equals("desc")) {
+            result = Helper.reverse(result);
+        }
+
+        outputQuery(action, result.limit(action.getNumber()));
     }
 
     private Stream<Actor> queryActors(final ActionInputData action) {
@@ -66,24 +85,6 @@ public final class Query extends ActionExecutor {
         return videoStream
                 .filter(video -> video.isFromYear(year) && video.hasGenres(genres))
                 .filter(filter).sorted(comparator);
-    }
-
-
-    /** executes an action of the Query type */
-    public void executeAction(final ActionInputData action) throws IOException {
-        Stream<? extends Entity> result = switch (action.getObjectType()) {
-            case "actors" -> queryActors(action);
-            case "movies", "shows" -> queryVideos(action);
-            default -> repository.getUsers()
-                    .filter(user -> user.ratings() > 0)
-                    .sorted(Comparator.comparing(User::ratings));
-        };
-
-        if (action.getSortType().equals("desc")) {
-            result = Helper.reverse(result);
-        }
-
-        outputQuery(action, result.limit(action.getNumber()));
     }
 
 }

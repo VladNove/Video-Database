@@ -3,8 +3,6 @@ package repo.Entities.UserTypes;
 import fileio.ActionInputData;
 import fileio.UserInputData;
 import utils.RecommendStrategy;
-
-import java.io.IOException;
 import repo.Entities.User;
 
 public final class StandardUser extends User {

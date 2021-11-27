@@ -3,26 +3,27 @@ package repo.Entities;
 import actor.ActorsAwards;
 import fileio.ActorInputData;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Actor extends Entity {
   private final String name;
   private final String careerDescription;
-  private final Map<String, Video> filmography;
+  private final Set<Video> filmography;
   private final Map<ActorsAwards, Integer> awards;
 
   public Actor(final ActorInputData actorInputData) {
     this.name = actorInputData.getName();
     this.careerDescription = actorInputData.getCareerDescription();
-    this.filmography = new HashMap<>();
+    this.filmography = new HashSet<>();
     this.awards = actorInputData.getAwards();
   }
 
-  public Map<String, Video> getFilmography() {
+  public Set<Video> getFilmography() {
     return filmography;
   }
 
@@ -30,7 +31,7 @@ public final class Actor extends Entity {
   public Double getRating() {
     double sum = 0;
     int cnt = 0;
-    for (Video video : filmography.values()) {
+    for (Video video : filmography) {
       double videoRating = video.getRating();
       if (videoRating > 0) {
         cnt++;

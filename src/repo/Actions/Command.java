@@ -19,6 +19,26 @@ public final class Command extends ActionExecutor {
         super(repository);
     }
 
+    /** executes an action of the Command type */
+    public void executeAction(final ActionInputData action) throws IOException {
+        User user = repository.getUser(action.getUsername());
+        Video video = repository.getVideo(action.getTitle());
+        String actionType = action.getType();
+
+        if (!actionType.equals("view") && user.notSeenVideo(video)) {
+            Output.write(action.getActionId(), "error -> " + video + " is not seen");
+            return;
+        }
+
+        CommandFunction cmd = switch (actionType) {
+            case "view" -> Command::view;
+            case "rating" -> Command::rate;
+            default -> Command::favourite;
+        };
+
+        cmd.apply(user, video, action);
+    }
+
     private static void view(final User user, final Video video, final ActionInputData action)
             throws IOException {
         int views = user.view(video);
@@ -46,42 +66,20 @@ public final class Command extends ActionExecutor {
             throws IOException {
         double grade = action.getGrade();
         int seasonNumber = action.getSeasonNumber();
-        Ratable target;
-        if (seasonNumber == 0) {
-            target = (Movie) video;
-        } else {
-            target = new SeasonRating(((Series) video).getSeason(seasonNumber));
-        }
+        Ratable target = (seasonNumber == 0)
+            ? (Movie) video
+            : new SeasonRating(((Series) video).getSeason(seasonNumber));
 
         if (user.rated(target)) {
-            Output.write(action.getActionId(), "error -> " + video + " has been already rated");
+            Output.write(action.getActionId(), "error -> "
+                    + video + " has been already rated");
         } else {
             user.rate(target);
             target.rate(grade);
             Output.write(action.getActionId(), "success -> "
-                   + video + " was rated with " + grade + " by " + user);
+                    + video + " was rated with " + grade + " by " + user);
         }
 
-    }
-
-    /** executes an action of the Command type */
-    public void executeAction(final ActionInputData action) throws IOException {
-        User user = repository.getUser(action.getUsername());
-        Video video = repository.getVideo(action.getTitle());
-        String actionType = action.getType();
-
-        if (!actionType.equals("view") && user.notSeenVideo(video)) {
-            Output.write(action.getActionId(), "error -> " + video + " is not seen");
-            return;
-        }
-
-        CommandFunction cmd = switch (actionType) {
-            case "view" -> Command::view;
-            case "rating" -> Command::rate;
-            default -> Command::favourite;
-        };
-
-        cmd.apply(user, video, action);
     }
 
     @FunctionalInterface

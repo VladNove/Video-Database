@@ -1,38 +1,119 @@
-Object Oriented Programming Course
-Homework - VideosDB
+Novetschi Vlad 322CA
 
-November 2021
+Tema 1 - POO - Videos DB
 
-# Info
-https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/tema
+README (in format MarkDown)
 
-# About the code
+Descriere
+-
+In cadrul acestei teme am avut de implementat un database cu informatii despre filme, seriale,
+useri, si actori. De asemenea, sunt simulate diverse actiuni (recomandari, ratinguri, etc).
 
-We provide the input tests, the logic that parses them and the checker that runs them.
+Implementare Database
+-
 
-* test_db - contains the tests in JSON format
-* src
-   * checker - the checker's sources including the checkstyle necessary files, not to be modified
-   * fileio - classes for parsing the input files, not to be modified
-   * common, utils
-        * contain utility classes with constants and static methods
-        * you can add your own functionality in the existing classes or add new classes as well
-   * actor
-        * contains an enum for the types of awards an actor can have - do not modify it
-        * you can add here your actor related classes
-   * entertainment
-        * contains an enum for the supported video genres - do not modify it
-        * class for representing a Season of a tv show - do not modify it
-        * you can add here your entertainment related classes
+fiecare din cele 3 entitati modelate are o clasa proprie si eventual clase derivate
+- User
+  - Premium User
+  - Standard User
+- Video
+  - Movie
+  - Series
+- Actor
 
-We encourage you to organize your implementation in packages based on the functionality their classes offer. Try to keep
-your code modular, readable and documented.
+Unele din aceste clase pot contine si colectii de referinte la alte entitati.
+_Ex: filmografia actorilor este reprezentata printr-un set de referinte la obiecte de tip Video_
 
-# Testing
+_Userii, Filmele, Serialele, Actorii_ sunt stocati in HashMap-uri ce au ca si cheie numele
+entitatatii (pentru a efectua rapid cautarile necesare).
 
-The Main class runs the checker on your implementation. Add the entry point to your implementation in it.
+Aceste mape sunt stocate in clasa **Repository**.
+Constructorul acestei clase primeste ca parametru un obiect de tip Input si
+apeleaza metodele _load_ care creeaza din fiecare obiect InputData un obiect corespunzator si il
+adauga in hashMap-ul potrivit.
 
-Run Main to test your implementation from the IDE or from command line.
+De asemenea metodele de load realizeaza si  legaturile dintre obiecte
+(_ex: in filmografia unui actor sunt adaugate referinte la Videouri
+in functie de titlurile citite din input_)
 
-Run the main method from Test class with the name of the input file from the command line and the result will be written
-to the out.txt file. Thus, you can compare this result with ref.
+pe langa metodele ce returneaza un User sau un Video cautat in functie de nume, 
+clasa **Repository** poate transmite datele cerute despre entitati prin utilizarea streamurilor.
+
+Pentru evitarea codului  duplcicat in cadrul actiunilor, inainte de a returna un stream cu entitati
+acestea sunt sortate in functie de nume. Userii / Actorii / Video-urile extind clasa **Entity**
+care este comparabila (implicit dupa nume).
+
+Implementarea Actiunilor
+-
+
+pentru a executa actiunile am utilizat design pattern-ul Strategy.
+
+Fiecare tip de actiune are o clasa corespunzatoare:
+- Command
+- Query
+- Recommend
+
+Toate acestea extind clasa ActionExecutor, ce are referinta la repository-ul pe care va fi aplicata
+actiunea, si o metoda abstracta _executeAction_, utilizata pentru aplicarea unei actiuni.
+
+Instanța fiecărui tip de comanda este creata la initializarea Repository-ului, si pusa
+intr-un HashSet de tipul `<String, ActionExecutor>`, cu care putem apela executia unei comenzi in
+functie de tipul acesteia (in metoda _doActions_, apelata in main, dupa initializarea
+repository-ului).
+
+Outputul actiunilor este transformat in JSON-uri si adaugat la array-ul de output prin intermediul
+clasei statice **Output** cu metoda _write_.
+
+Implementarea Comenzilor
+-
+toate cele 3 tipuri de comenzi
+- view
+- favourite
+- rating
+
+au in comun faptul ca necesita un utilizator care apeleaza comanda, si un video tinta.
+Asadar pentru modularizarea codului am utilizat o interfata functionala **CommandFunction**.
+
+Astfel, pentru executarea unei comenzi gasim utilizatorul ce aplica comanda, gasim videoul "tinta"
+si printr-un switch cu referinte la metodele corespunzatoare putem efectua actiunea dorita cu un
+minim de cod duplicat.
+
+_pentru a evita codul duplicat in cadrul ratingurilor pentru sezoane si filme am implementat
+interfata ratable, si wrapperul SeasonRating_
+
+Implementarea Query-urilor
+-
+Outputul tuturor querry-urilor este un array ordonat de entitati. pentru generarea mesajului de
+output am folsoit metoda generica outputQuery, ce primeste un stream de obiecte ce extind clasa
+**Entity** si le afiseaza corespunzator. Pentru generarea acestui stream (_result_), apelam metoda
+corespunzatoare tipului de entitate cerut (actor / user / video).
+
+Fiecare querry are 3 pasi:
+
+- obtinerea streamului corespunzator din repository
+- filtrarea streamului dupa filtrele specificate in actiune / dupa tipul de querry
+- sortarea in functie de tipul de querry
+
+Clasele Actor si Video au diverse metode care returneaza
+"rapid" informatiile necesare, asadar putem folosi referinte la metode sau expresii lambda scurte 
+pentru usurarea filtrarilor / a sortarilor.
+
+_De asemeena pentru a modulariza codul am utilizat Predicate pentru filtre si Comparatori
+pentru sortari. Atat predicatele cat si comparatorii sunt alesi in functie de tipul de querry._
+
+Implementarea Recomandarilor
+-
+Recomandarile se comporta diferit in functie de utilizatorul care le "cere".
+Asadar am utilizat pattern-ul Visitor.
+
+Fiecare strategie de recomandare extinde clasa RecommendStrategy, care contine metode abstracte
+pentru vizitarea utilizatorilor standard sau a utilizatorilor premium.
+Clasa User contine metoda abstracta acceptRecommendation, care va apelea metoda de visit din
+strategia de recomandare transmisa ca parametru. (Double dispatch)
+
+Astfel am evitat utilizarea instanceOf sau a verificarii tipului de utilizator.
+
+_Folosim si aici strategy pattern similar cu cel de la repository, avand un hashmap
+cu strategii de recomadnare pe care le apelam in functie de tipul de recomandare cerut_
+
+
