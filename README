@@ -1,11 +1,14 @@
-Novetschi Vlad 322CA
-
-Tema 1 - POO - Videos DB
+**Novetschi Vlad 322CA**
+-
 
 README (in format MarkDown)
 
-Descriere
+Tema 1 - POO - Videos DB
 -
+
+
+**Descriere**
+
 In cadrul acestei teme am avut de implementat un database cu informatii despre filme, seriale,
 useri, si actori. De asemenea, sunt simulate diverse actiuni (recomandari, ratinguri, etc).
 
@@ -114,6 +117,12 @@ strategia de recomandare transmisa ca parametru. (Double dispatch)
 Astfel am evitat utilizarea instanceOf sau a verificarii tipului de utilizator.
 
 _Folosim si aici strategy pattern similar cu cel de la repository, avand un hashmap
-cu strategii de recomadnare pe care le apelam in functie de tipul de recomandare cerut_
+cu strategii de recomandare pe care le apelam in functie de tipul de recomandare cerut_
 
+__FEEDBACK ->__ a fost o tema interesanta, initial mi s-a parut un pic muncitoreasca, dar am
+realizat rapid ca aceasta parere ar fi fost adevarata doar daca aveam un cod mai slab modularizat.
+Incercarea de evita cat mai mult duplicarea codului m-a incurajat sa caut multe informatii
+legate de limbajul java (ex: streamuri, functii lambda, predicate, interfete functionale,
+referinte la metode samd). De asemenea m-a ajutat sa imi antrenez gandirea orientata pe obiecte.
 
+**Novetschi Vlad 322CA**
