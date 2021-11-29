@@ -37,10 +37,10 @@ public final class PopularRecommend extends RecommendStrategy {
       Optional<Video> recommendedVideo =
           getUnseenVideos(user)
               .filter(video -> video.hasGenre(genre))
-              .min(Comparator.comparing(Video::getId));
+              .findFirst();
       if (recommendedVideo.isPresent()) {
-          return "PopularRecommendation result: " + recommendedVideo.get();
-        }
+        return "PopularRecommendation result: " + recommendedVideo.get();
+      }
     }
     return errorMessage;
   }

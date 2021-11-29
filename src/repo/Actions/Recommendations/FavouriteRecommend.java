@@ -26,7 +26,6 @@ public final class FavouriteRecommend extends RecommendStrategy {
   public String visit(final PremiumUser user, final ActionInputData action) {
     Optional<Video> recommendedVideo =
         getUnseenVideos(user)
-            .sorted(Comparator.comparing(Video::getId))
             .max(Comparator.comparing(Video::getFavourites));
 
     return recommendedVideo

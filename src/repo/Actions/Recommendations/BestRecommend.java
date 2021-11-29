@@ -28,7 +28,8 @@ public final class BestRecommend extends RecommendStrategy {
 
   private String visit(final User user) {
     Optional<Video> recommendedVideo =
-        getUnseenVideos(user).max(Comparator.comparing(Video::getRating));
+        getUnseenVideos(user)
+            .max(Comparator.comparing(Video::getRating));
 
     return recommendedVideo
         .map(video -> "BestRatedUnseenRecommendation result: " + video)

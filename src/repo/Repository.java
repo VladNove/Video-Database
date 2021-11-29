@@ -92,6 +92,7 @@ public final class Repository {
             ? new PremiumUser(userInputData)
             : new StandardUser(userInputData);
 
+    //loads user view history
     for (Map.Entry<String, Integer> entry : userInputData.getHistory().entrySet()) {
       Video video = getVideo(entry.getKey());
       int nrViews = entry.getValue();

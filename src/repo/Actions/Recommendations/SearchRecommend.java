@@ -28,10 +28,10 @@ public final class SearchRecommend extends RecommendStrategy {
             .sorted(Comparator.comparing(Video::toString))
             .sorted(Comparator.comparing(Video::getRating))
             .toArray();
-    if (result.length == 0) {
-      return errorMessage;
-    } else {
+    if (result.length > 0) {
       return "SearchRecommendation result: " + Arrays.toString(result);
+    } else {
+      return errorMessage;
     }
   }
 }
